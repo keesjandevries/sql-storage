@@ -1,20 +1,30 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sqlite3 
-import sys
-import random
+import sqlite3 , sys, random, os, argparse
 
 Ninput=5
 Noutput=50
 Npoints=10000
 
 con = None
+def parse_args():
+    parser = argparse.ArgumentParser(description='Creating an sql data base')
+    parser.add_argument('--output-file','-o', dest='output_file', action='store', 
+            default='test.db',  help='Name of output date base file')
+    parser.add_argument('--recreate', dest='recreate', action='store_true', 
+            default=False,  help='Recreate data base, i.e. delete existing file if exists')
+    return parser.parse_args()
+
+args= parse_args()
+
+if args.recreate:
+    os.remove()
 
 # the real stuff
 try:
     #connection
-    con=sqlite3.connect('test.db')
+    con=sqlite3.connect(args.output_file)
     #cursor
     cur=con.cursor()
     input_string=','.join([' in{} REAL '.format(i) for i in range(1,Ninput+1)])
