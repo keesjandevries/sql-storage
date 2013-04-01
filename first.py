@@ -7,6 +7,7 @@ import random
 
 Ninput=5
 Noutput=50
+Npoints=10000
 
 con = None
 
@@ -19,9 +20,10 @@ try:
     input_string=','.join([' in{} REAL '.format(i) for i in range(1,Ninput+1)])
     output_string=','.join([' out{} REAL '.format(i) for i in range(1,Noutput+1)])
     cur.execute('CREATE TABLE IF NOT EXISTS Points(Id INT, CollectionId INT, {},{}) '.format(input_string,output_string))
-    one_in_output=tuple([1,2]+[ random.random() for i in range(Ninput+Noutput)])
+    many_in_output=tuple([ tuple([1,2]+[ random.random() for i in range(Ninput+Noutput)]) for j in range(Npoints)])
     questionmarks= ','.join(['?' for i in range(Ninput+Noutput+2)])  # ?, ... , ?
-    cur.execute('INSERT INTO Points VALUES({}) '.format(questionmarks),one_in_output)
+#    cur.execute('INSERT INTO Points VALUES({}) '.format(questionmarks),one_in_output)
+    cur.executemany('INSERT INTO Points VALUES({}) '.format(questionmarks),many_in_output)
     con.commit()
 
 # Finalise ...
