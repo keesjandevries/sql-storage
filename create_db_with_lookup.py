@@ -246,7 +246,7 @@ def create_points_table(con,cur):
     cur.execute('select point_column from obs_id_lookup')
     point_column_names=[ name_tuple[0] for name_tuple in cur.fetchall()]
     #create table with (point_id, collection_id, [observables])
-    cur.execute('create table if not exists points(point_id integer, collection_id, {})'.format(','.join(point_column_names)))
+    cur.execute('create table if not exists points(point_id integer primary key, collection_id, {})'.format(','.join(point_column_names)))
     #commit
     con.commit()
 
