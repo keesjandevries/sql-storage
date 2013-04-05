@@ -12,6 +12,7 @@ def parse_args():
     return parser.parse_args()
 
 
+# FIXME: this function is now duplicated from fill_points. Will and up in something lite mc_sql_tools.py
 def get_columns_and_observable_ids(con,cur):
     cur.execute('select point_column, obs_id_field1 , obs_id_field2 from obs_id_lookup')
     obs_id_lookup=cur.fetchall()
@@ -22,35 +23,18 @@ def get_columns_and_observable_ids(con,cur):
         oids[col]=(id1,id2)
     return columns, oids
 
-def mc_points_to_rows(con,cur,points,collection_id=1):
+def query_points_table(con,cur,query_condition):
     #Here starts the niceness!
     obs_columns, mc_obs_ids = get_columns_and_observable_ids(con,cur)
-    rows=[]
-    for point in points:
-        #The following checks whether
-        #   the point contains all the information in the lookup table, 
-        #   the lookup table is complete
-        try:
-            observables=[point[mc_obs_ids[col]] for col in obs_columns]
-        except KeyError:
-            #This crashes if the KeyError was caused in calling mc_obs_ids[col], which should not happend
-            print("WARNING: presumably point does not contain key {}".format(mc_obs_ids[col]))
-        if len(point) > len(obs_columns):
-            print("WARNING: DATABASE IS MISSING COLUMNS")
-            print("         FIXME: A function is needed to take care of this")
-
-        #Et voila: le point :D :D
-        rows.append(tuple([collection_id]+observables))
-    return rows
-
-#def make_some_random_rows(con,cur):
-#    #count number of columns
-#    cur.execute("pragma table_info(points)")
-#    n_columns=len(cur.fetchall())
-#    rows=[]
-#    for i in range(args.n_points):
-#        rows.append(tuple(np.append([2], np.random.rand(n_columns-2)))) 
-#    return rows
+#    all_columns=','.join(obs_columns)
+    
+    cur.execute('select * from points where {}'.format( query_condition))
+    rows=cur.fetchall()
+    points=[]
+    for row in rows:
+        point={mc_obs_ids[col]: val for col, val in zip(obs_columns, row[2:]) } #FIXME: we may want to replace this with row_factory
+        points.append(point)
+    return points
 
 
 if __name__=="__main__" :
@@ -61,10 +45,8 @@ if __name__=="__main__" :
         #connection and cursor
         con=sqlite3.connect(args.input_file)
         cur=con.cursor()
-        #dump one point
-#        rows=make_some_random_rows(con,cur)
-        rows=mc_points_to_rows(con,cur,[one_point])
-        dump_rows(con,cur,rows)
+        #retrieve a point
+        m0=query_points_table(con,cur,'obs0 > 10')[0][('MINPAR','M0')]
     
     # Finalise ...
     except sqlite3.Error as e:
