@@ -23,6 +23,13 @@ def parse_args():
 
 args= parse_args()
 
+def create_lookup(cur):
+    cur.execute('create table if not exists obs_id_lookup(id integer primary key, point_column TEXT, obs_id_field1 TEXT, obs_id_field2 TEXT)')
+    obs_ids=[('MINPAR','M0'),('MINPAR','M12')]
+    for i,obs_id in enumerate(obs_ids):
+        cur.execute('insert into obs_id_lookup values(null,?,?,?)',('obs{}'.format(i),obs_id[0],obs_id[1]))
+    
+
 if not args.update:
     try:
         os.remove(args.output_file)
@@ -31,22 +38,24 @@ if not args.update:
 
 # the real stuff
 try:
-    #set numbers
-    Ninput=args.n_inputs
-    Noutput=args.n_outputs
-    Npoints=args.n_points
-    collection_id=args.collection_id
     #connection
     con=sqlite3.connect(args.output_file)
     #cursor
     cur=con.cursor()
-    input_string=','.join([' in{} REAL '.format(i) for i in range(1,Ninput+1)])
-    output_string=','.join([' out{} REAL '.format(i) for i in range(1,Noutput+1)])
-    cur.execute('CREATE TABLE IF NOT EXISTS Points(Id INT, CollectionId INT, {},{}) '.format(input_string,output_string))
-    many_in_output=tuple([ tuple(np.append([j,collection_id], np.random.rand(Ninput+Noutput))) for j in range(Npoints)])
-    questionmarks= ','.join(['?' for i in range(Ninput+Noutput+2)])  # ?, ... , ?
-#    cur.execute('INSERT INTO Points VALUES({}) '.format(questionmarks),one_in_output)
-    cur.executemany('INSERT INTO Points VALUES({}) '.format(questionmarks),many_in_output)
+    #set numbers
+    create_lookup(cur)
+#
+#    Ninput=args.n_inputs
+#    Noutput=args.n_outputs
+#    Npoints=args.n_points
+#    collection_id=args.collection_id
+#    input_string=','.join([' in{} REAL '.format(i) for i in range(1,Ninput+1)])
+#    output_string=','.join([' out{} REAL '.format(i) for i in range(1,Noutput+1)])
+#    cur.execute('CREATE TABLE IF NOT EXISTS Points(Id INT, CollectionId INT, {},{}) '.format(input_string,output_string))
+#    many_in_output=tuple([ tuple(np.append([j,collection_id], np.random.rand(Ninput+Noutput))) for j in range(Npoints)])
+#    questionmarks= ','.join(['?' for i in range(Ninput+Noutput+2)])  # ?, ... , ?
+##    cur.execute('INSERT INTO Points VALUES({}) '.format(questionmarks),one_in_output)
+#    cur.executemany('INSERT INTO Points VALUES({}) '.format(questionmarks),many_in_output)
     con.commit()
 
 # Finalise ...
