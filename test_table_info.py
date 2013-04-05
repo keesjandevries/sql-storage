@@ -23,8 +23,9 @@ try:
     #cursor
     cur=con.cursor()
     #fetch the rows
-    cur.execute('pragma table_info(table_name)')
-    print(cur.fetchall())
+    cur.execute('pragma table_info(points)')
+    column_names=[info_tup[1] for info_tup in cur.fetchall()]
+#    print(column_names)
 
 # Finalise ...
 except sqlite3.Error as e:
