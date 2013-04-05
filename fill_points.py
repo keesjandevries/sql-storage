@@ -262,14 +262,14 @@ def mc_points_to_rows(con,cur,points,collection_id=1):
         rows.append(tuple([collection_id]+observables))
     return rows
 
-def make_some_random_rows(con,cur):
-    #count number of columns
-    cur.execute("pragma table_info(points)")
-    n_columns=len(cur.fetchall())
-    rows=[]
-    for i in range(args.n_points):
-        rows.append(tuple(np.append([2], np.random.rand(n_columns-2)))) 
-    return rows
+#def make_some_random_rows(con,cur):
+#    #count number of columns
+#    cur.execute("pragma table_info(points)")
+#    n_columns=len(cur.fetchall())
+#    rows=[]
+#    for i in range(args.n_points):
+#        rows.append(tuple(np.append([2], np.random.rand(n_columns-2)))) 
+#    return rows
 
 
 if __name__=="__main__" :
